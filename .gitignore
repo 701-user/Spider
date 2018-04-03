@@ -1,0 +1,7 @@
+\.idea
+\pdf
+\mySpider
+\__pycache__
+\ghostdriver.*
+\replace
+\安装说明.*
