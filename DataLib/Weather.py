@@ -155,9 +155,13 @@ class weather(thread):
                         else:
                             res = ""
                     if self.dbNameDict[key] == "po":
-                        if len(res.split(" ")[0]) > 2:
-                            res = res.split(" ")[2]
-                        else:
+                        divList = td.findAll("div")
+                        res = None
+                        for div in divList:
+                            if "style" not in div.attrs:
+                                res = div.text
+                                break
+                        if res is None:
                             res = ""
                     if self.dbNameDict[key] == "ff":
                         if len(res.split(" ")[0]) > 0:

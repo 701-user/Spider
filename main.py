@@ -28,7 +28,7 @@ def main():
         "water":"\\config\\waterQuality.ini",
         "aqi": "\\config\\AQI.ini",
         "news":"\\config\\news.ini",
-        "db": "C:\\Windows\\System32\\config.ini"
+        "db": "\\config\\config.ini"
     }
     print("主入口函数")
     if not testLib():

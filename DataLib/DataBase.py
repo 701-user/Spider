@@ -13,7 +13,7 @@ class dataBase:
     INSERT,SELECT = 0,1
     def __init__(self,configFile):
         self.dbConn = None
-        self.confFile = configFile
+        self.confFile = os.getcwd() + configFile
 
     def loadConfig(self):
         print("读取数据库配置文件")
@@ -22,26 +22,28 @@ class dataBase:
         ## 从 C:/windows/system32/文件夹下
         conf.read(self.confFile,'utf-8')
 
-        ##本地数据库测试
-        self.userName = conf.get(conf.sections()[4], "12KdT")
-        self.password = conf.get(conf.sections()[4], "ASdc")
-        self.host = conf.get(conf.sections()[4], "Qwest")
-        self.port = conf.get(conf.sections()[4], "Pk1533")
-        self.databaseName =conf.get(conf.sections()[4], "ddO")
+        #本地数据库测试
+        # self.userName = conf.get(conf.sections()[4], "12KdT")
+        # self.password = conf.get(conf.sections()[4], "ASdc")
+        # self.host = conf.get(conf.sections()[4], "Qwest")
+        # self.port = conf.get(conf.sections()[4], "Pk1533")
+        # self.databaseName =conf.get(conf.sections()[4], "ddO")
 
-        # ## 数据库字段解密
-        # self.userName = conf.get(conf.sections()[0], "12KdT")
-        # self.password = conf.get(conf.sections()[0], "ASdc")
-        # self.host = conf.get(conf.sections()[0], "Qwest")
-        # self.port = conf.get(conf.sections()[0], "Pk1533")
-        # self.databaseName =conf.get(conf.sections()[0], "ddO")
-        # ## 解密过程
-        # pc = encoder()  # 初始化密钥
-        # self.userName = pc.decrypt(self.userName)
-        # self.password = pc.decrypt(self.password)
-        # self.host = pc.decrypt(self.host)
-        # self.port = pc.decrypt(self.port)
-        # self.databaseName = pc.decrypt(self.databaseName)
+        # 数据库字段解密
+        # t = conf.sections()
+        self.userName = conf.get(conf.sections()[0], "12KdT")
+        self.password = conf.get(conf.sections()[0], "ASdc")
+        self.host = conf.get(conf.sections()[0], "Qwest")
+        self.port = conf.get(conf.sections()[0], "Pk1533")
+        self.databaseName =conf.get(conf.sections()[0], "ddO")
+
+        # 解密过程
+        pc = encoder()  # 初始化密钥
+        self.userName = pc.decrypt(self.userName)
+        self.password = pc.decrypt(self.password)
+        self.host = pc.decrypt(self.host)
+        self.port = pc.decrypt(self.port)
+        self.databaseName = pc.decrypt(self.databaseName)
 
         while self.connectDB() != True:
             print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " 数据库连接失败，请检查相关配置")
@@ -297,6 +299,13 @@ class dataBase:
     def waterLatestTime(self):
         sqlStatment = "select Max(dtime) from media.waterreport "
         result = self.sqlExec(sqlStatment,self.SELECT)
+        if len(result) > 0:
+            return result[0]
+        else:
+            return None
+    def newsLastestTime(self):
+        sqlStatment = "select Max(dtime) from media.news "
+        result = self.sqlExec(sqlStatment, self.SELECT)
         if len(result) > 0:
             return result[0]
         else:

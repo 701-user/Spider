@@ -13,7 +13,7 @@ class water(thread):
         thread.__init__(self)
         self.configFile = os.getcwd() + file
         self.conn = conn
-        self.waterRank = {'--':0,
+        self.waterRank = {'——':0,'--':0,
             'Ⅰ':1,'Ⅱ':'2','Ⅲ':'3','Ⅳ':'4',
             'Ⅴ':'5','>Ⅰ':10,'>Ⅱ':20,'>Ⅲ':30,
             '>Ⅳ':40,'>Ⅴ':50}
@@ -50,6 +50,7 @@ class water(thread):
         self.otherRiverDict[int(conf.get(waterSection[3], "excpara"))] = "excpara"
         self.otherRiverDict[int(conf.get(waterSection[3], "note"))] = "note"
         self.otherRiverDict[0] = "dtime"
+        self.otherRiverDict[1] = "index"
         self.waterClass = int(conf.get(waterSection[3], "waterclass"))
 
 
@@ -159,25 +160,43 @@ class water(thread):
         trList = otherRiver.findAll("tr")
         trList.pop(0)
         trList.pop(len(trList) - 1)
-        resultList = list()
-        for tr in trList:
-            dbOtherRiver = dict()
-            tdPosition = 1
-            dbOtherRiver[self.otherRiverDict[0]] = recordTime
+        ## FIXME THE DIFFERENT TABLE HOW TO EBABDED THEM
+        all_tr_info = list()
+        for i in range(len(trList)):
+            trDict = dict()
+            trDict[self.otherRiverDict[0]] = recordTime
+            trDict[self.otherRiverDict[1]] = None
+            trDict[self.otherRiverDict[2]] = None
+            trDict[self.otherRiverDict[3]] = None
+            trDict[self.otherRiverDict[4]] = None
+            trDict[self.otherRiverDict[5]] = None
+            trDict[self.otherRiverDict[6]] = None
+            trDict[self.otherRiverDict[7]] = None
+            all_tr_info.append(trDict)
+        for i,tr in enumerate(trList):
             tdList = tr.findAll("td")
-            tdList.pop(0)
+            tdPosition = 1
             for td in tdList:
-                value = td.text.replace("\r\n","")
-                value = value.replace(" ","")
-                if value in self.waterRank and tdPosition == self.waterClass:
-                    dbOtherRiver[self.otherRiverDict[tdPosition]] = self.waterRank[value]
-                    tdPosition += 1
-                    continue
-                dbOtherRiver[self.otherRiverDict[tdPosition]] = value
+                rowLen = 1
+                if "rowspan" in td.attrs:
+                    rowLen = int(td["rowspan"])
+                value = td.text.replace("\r\n", "")
+                value = value.replace(" ", "")
+                if value in self.waterRank:
+                    value = self.waterRank[value]
+                if rowLen == 1:
+                    for tdValue in all_tr_info[i]:
+                        if all_tr_info[i][tdValue] is None:
+                            all_tr_info[i][tdValue] = value
+                            break
+                else:
+                    for k in range(rowLen):
+                        all_tr_info[i + k][self.otherRiverDict[tdPosition]] = value
                 tdPosition += 1
-            resultList.append(dbOtherRiver)
         ## 保存数据到数据库中
-        self.conn.saveWater(resultList, "media.waterreport")
+        for info in all_tr_info:
+            info.pop("index")
+        self.conn.saveWater(all_tr_info, "media.waterreport")
     def judgeTime(self,spiderTime,dbTime):
         spider = datetime.datetime.strptime(spiderTime, "%Y-%m-%d")
         db = datetime.datetime.strptime(dbTime, "%Y-%m-%d")

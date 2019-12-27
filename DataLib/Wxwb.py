@@ -21,7 +21,7 @@ import threading
 class wxwb(thread):
     def __init__(self, file, conn):
         thread.__init__(self)
-        self.configFile = file
+        self.configFile = os.getcwd() + file
         self.session = requests.Session()
         self.conn = conn
         self.exception = None
@@ -29,7 +29,7 @@ class wxwb(thread):
         self.__flag.set()
         self.__running = threading.Event()
         self.__running.set()
-        self.coockie="IPLOC=CN4201; SUID=0499C5DA2028940A000000005A6D4B75; SUID=E0B0AC3B2513910A000000005A6D4B76; weixinIndexVisited=1; SUV=00DE5AA43BACB0E05A6D4B77ABF4C088; ABTEST=0|1522336708|v1; SNUID=144558CEF4F09D044E7A484CF5BC576F; JSESSIONID=aaay89FYM96oI_Cb4KOiw; ppinf=5|1522763746|1523973346|dHJ1c3Q6MToxfGNsaWVudGlkOjQ6MjAxN3x1bmlxbmFtZTo2OllhbmFubnxjcnQ6MTA6MTUyMjc2Mzc0NnxyZWZuaWNrOjY6WWFuYW5ufHVzZXJpZDo0NDpvOXQybHVKQTNpUllKRi1yVXEzbDNMWGpmazBVQHdlaXhpbi5zb2h1LmNvbXw; pprdig=s3F4d-BqKeaMBhgTh4InXef39OFN8I3rvdxGHLhjlXeK7NraJVdYG6R0QR0zDRQMyLtERJvsm_fldEkVyP_sPtENWUZ23_BlRNHdPgaExiaxk8AeXTBEXgc7s_-r_NEbpqK6LjIjU3DL-L_m0BV_q9iP8A0UQEuT-EcpHweH568; sgid=07-31103317-AVrDhibLQnuo2t6fA4IoRficE; sct=13; ppmdig=152276689100000063552a5377d042fad92db2cce572928e"
+        self.coockie="CXID=F64EA1C1EE71464E0AE9496DDB957FA9; SUID=7C1B2F6F4D238B0A5AA67A7E0004C968; IPLOC=CN4201; ld=qlllllllll2z$hkIlllllV$r3j6lllllbhDbKlllll9lllll9llll5@@@@@@@@@@; SUV=001F272C6F2F1B7C5AAB2829BA0C3516; LSTMV=173%2C157; LCLKINT=1558; ABTEST=0|1521170042|v1; weixinIndexVisited=1; ad=$yllllllll2zIXIMlllllVrx8rclllllbhDbKlllllwllllllklll5@@@@@@@@@@; ppinf=5|1522658690|1523868290|dHJ1c3Q6MToxfGNsaWVudGlkOjQ6MjAxN3x1bmlxbmFtZTo2OllhbmFubnxjcnQ6MTA6MTUyMjY1ODY5MHxyZWZuaWNrOjY6WWFuYW5ufHVzZXJpZDo0NDpvOXQybHVKQTNpUllKRi1yVXEzbDNMWGpmazBVQHdlaXhpbi5zb2h1LmNvbXw; pprdig=oWt_1yTlPPdwaLqYONwvsigRdpMMQPUCE3fcaSwjw9654IMBYyXr87-3rQQsf2UEA0x77OSmCoPv7pz3XA9_2upaWO7s7taUnXzimYa0ZcmjXfl7_V1UtV_a_8JGa5TrIGrmLoWwGd6C6NIP6_WSwJw6-AYYvm1yli2WxQiBxLw; sgid=07-31103317-AVrB7YJQ4pUV2XTxFJVdxHA; SUIR=7DF7B415696D0150C9C8A07D69710805; ppmdig=15232491420000000128e013415d536b98938b985614e2c7; PHPSESSID=kqktknrm6n7rmmnd746ohv2rm1; SNUID=82094AEA9793FEF58288D8F597FA9ACF; seccodeRight=success; successCount=1|Mon, 09 Apr 2018 04:50:58 GMT; JSESSIONID=aaahPbzV_yKAih4JaeViw; sct=32"
 
     def pause(self):
         self.__flag.clear()
@@ -48,27 +48,40 @@ class wxwb(thread):
     def wx(self,type):
         self.conn.saveLogInfo("wxwb", "正在抓取微信信息", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 1)
         print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " wxwb " + "正在抓取微信信息   " + "运行状态: " + str(1))
-        tsn = 1
-        referUrlHead = None
-        referUrlBottom = None
-        urlHead = None
-        urlBottom = None
 
-        if type == 0:
-            tsn = 3
         if type == 1:
             tsn = 1
-        if type == 2:
+            self.wxRun(None,None,None,None,None,tsn,type)
+        else:
             referUrlHead = "http://weixin.sogou.com/weixin?type=2&s_from=input&query="
             referUrlBottom = "&ie=utf8&_sug_=y&_sug_type_=&w=01019900&sut=1278&sst0=1522764396636&lkt=1%2C1522764396534%2C1522764396534"
-
-            endTime = time.strftime("%Y-%m-%d")
-            startTime = datetime.datetime.now() - datetime.timedelta(days = 120)
-            startTime = startTime.strftime("%Y-%m-%d")
-
             urlHead = "http://weixin.sogou.com/weixin?type=2&ie=utf8&query="
-            urlBottom = "&tsn=5&ft=" + startTime +"&et=" + endTime
-
+            # testTime = "2018-03-02"
+            # nowTime = datetime.datetime.strptime(testTime,"%Y-%m-%d")
+            nowTime = datetime.datetime.now()
+            if type == 0:
+                ## 表示爬取一月30天的数据
+                for i in range(0,30):
+                    startTime = nowTime - datetime.timedelta(days = i)
+                    endTime = startTime
+                    startTime = startTime.strftime("%Y-%m-%d")
+                    endTime = endTime.strftime("%Y-%m-%d")
+                    self.conn.saveLogInfo("wxwb", "检索时间为 %s" %startTime, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 1)
+                    print(datetime.datetime.now().strftime(
+                        "%Y-%m-%d %H:%M:%S") + " wxwb " + "检索时间为 %s  " %startTime + "运行状态: " + str(1))
+                    self.wxRun(urlHead,referUrlHead,referUrlBottom,startTime,endTime,None,type)
+            if type == 2:
+                ##表示爬取四个月数据
+                for i in range(0,120):
+                    startTime = nowTime - datetime.timedelta(days=i)
+                    endTime = startTime
+                    startTime = startTime.strftime("%Y-%m-%d")
+                    endTime = endTime.strftime("%Y-%m-%d")
+                    self.conn.saveLogInfo("wxwb", "检索时间为 %s" % startTime,
+                                          datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 1)
+                    print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " wxwb " + "检索时间为 %s  " % startTime + "运行状态: " + str(1))
+                    self.wxRun(urlHead, referUrlHead, referUrlBottom, startTime, endTime, None,type)
+    def wxRun(self,urlHead,referUrlHead,referUrlBottom,startTime,endTime,tsn,typeNumber):
         self.addresses, self.keyList = self.conn.getWxWbKey("weixin")
         for i,keys in enumerate(self.keyList):
             self.keysList = keys.split("|")[0].strip(" ")
@@ -85,9 +98,9 @@ class wxwb(thread):
             while True:
                 if urlHead:
                     if page == 1:
-                        url = urlHead + urlParse.quote(queryKeys) + urlBottom + "&interation=&wxid=&usip="
+                        url = urlHead + urlParse.quote(queryKeys) + "&tsn=5&ft=" + startTime + "&et="+ endTime + "&interation=&wxid=&usip="
                     else:
-                        url = "http://weixin.sogou.com/weixin?usip=&query=" +urlParse.quote(reKey)+ urlBottom + "&interation=&type=2&wxid=&page=2&ie=utf8"
+                        url = "http://weixin.sogou.com/weixin?usip=&query=" +urlParse.quote(reKey)+ "&ft="+startTime + "&tsn=5&et=" + endTime + "&interation=&type=2&wxid=&page="+str(page)+"&ie=utf8"
                 else:
                     if page == 1:
                         url = "http://weixin.sogou.com/weixin?type=2&ie=utf8&query"+urlParse.quote(queryKeys)+"=&tsn="+ str(tsn) +"&ft=&et=&interation=&wxid=&usip="
@@ -109,19 +122,27 @@ class wxwb(thread):
                     print("len"+str(liLen))
                     break
                 liList = ulContent.findAll("li")
+                if len(liList) == 0:
+                    self.conn.saveLogInfo("wxwb", "该页检索内容为0",
+                                          datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 1)
+                    print("wxwb " + "该页检索内容为0" + datetime.datetime.now().strftime(
+                        "%Y-%m-%d %H:%M:%S") + str(1))
                 liLen += len(liList)
                 for li in liList:
                     txtDiv = li.find("div", {"class": self.wxDivTxt})
                     titleA = txtDiv.find("h3").find("a")
                     comment = titleA.text + txtDiv.find("p").text
                     articalHerf = titleA["href"]
+
+                    ## 搜狗页面变化，href 存的是相对地址，需要增加http://weixin.sogou.com
+                    if not re.match(r'^https?:/{2}\w.+$', articalHerf):
+                        articalHerf = "http://weixin.sogou.com" + articalHerf
+
                     nickDiv = txtDiv.find("div", {"class": self.wxNickDiv})
                     if not self.analyze(articalHerf,nickDiv.find("a").text,None):
                         self.conn.saveLogInfo("wxwb", articalHerf + "该文章不符合要求", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),1)
                         print("wxwb "+ articalHerf + "该微信文章不符合要求" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + str(1))
                         continue
-
-
                     imgs = li.findAll("img")
                     imgList = list()
                     if imgs:
@@ -147,16 +168,21 @@ class wxwb(thread):
                     else:
                         sqlDict["img"] = imgStr
                     self.conn.saveWxWb(sqlDict,"media.weixin")
-                pageDiv = soup.findAll("div",{"class":self.wxPageDiv})
-                if len(pageDiv) == 0:
+                pageDiv = soup.find("div",{"class":self.wxPageDiv})
+                if pageDiv != None:
+                    if len(pageDiv.findAll("a",{"id":"sogou_next"})) <= 0:
+                        break
+                else:
                     break
-                if type == 1:
+                # if len(pageDiv) == 0:
+                #     break
+                if typeNumber == 1:
                     time.sleep(random.randint(10,20))
-                if type == 0 :
+                if typeNumber == 0 :
                     self.conn.saveLogInfo("wxwb", "微信初始化一个月防验证码sleep",datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 1)
                     print("wxwb " + "微信初始化一个月防验证码sleep" + datetime.datetime.now().strftime( "%Y-%m-%d %H:%M:%S") + str(1))
                     time.sleep(1000)
-                if type == 2 :
+                if typeNumber == 2 :
                     self.conn.saveLogInfo("wxwb", "微信初始化四个月防验证码sleep",datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 1)
                     print("wxwb " + "微信初始化四个月防验证码sleep" + datetime.datetime.now().strftime( "%Y-%m-%d %H:%M:%S") + str(1))
                     time.sleep(1000)
@@ -165,8 +191,6 @@ class wxwb(thread):
             if liLen == 0 :
                 self.conn.saveLogInfo("wxwb", self.addresses[i] + "微信未抓取到任何记录，请检查是否出错", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 1)
                 print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " wxwb " + self.addresses[i] + " 微信未抓取到任何记录，请检查是否出错   " + "运行状态: " + str(1))
-
-
 
     # def notKeySacape(self,str):
     #     lists = self.keysScapes.split(" ")
@@ -241,23 +265,14 @@ class wxwb(thread):
         keyword = urlRequest.quote(keyword)
         pam = "&typeall=1&suball=1&timescope=custom:"
 
-        testUrl = "http://s.weibo.com/weibo/"+keyword+pam+self.getTime(weeks)+"&Refer=g"
+        testUrl = "http://s.weibo.com/weibo/?q="+keyword+pam+self.getTime(weeks)+"&Refer=g"
         res = session.get(testUrl)
         if not res:
             self.conn.saveLogInfo("wxwb", "微博查询结果为空", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 1)
             print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " wxwb " + "微博查询结果为空  " + "运行状态: " + str(1))
             return
         content = res.text
-        test = re.findall('<script>STK && STK\\.pageletM && STK\\.pageletM\\.view\\((.*)\\)</script>', content)
-        body = None
-        for jsonStr in test:
-            testJson = json.loads(jsonStr)
-            if testJson["pid"] != "pl_weibo_direct":
-                continue
-            body = testJson["html"]
-            break
-        assert body
-        soup = BeautifulSoup(body,"lxml")
+        soup = BeautifulSoup(content,"lxml")
         searchContent = soup.find("div",{"class":self.webDivSearch})
         noResult = searchContent.find("div",{"class":self.webDivNoResult})
         if noResult:
@@ -275,45 +290,61 @@ class wxwb(thread):
                 originArticle.decompose()
 
             resultDict = dict()
-            name =  div.find("a",{"class":self.webAcontentClass})
-            nick = name["nick-name"]
-            comment = div.find("p",{"class":self.webPcommentClass}).text
-            concretContent = div.find("a", {"class": self.webAconcretClass})
-            href = concretContent["href"]
+            content = div.find("div",{"class":self.webAcontentClass})
+            if len(content) == 0:
+                continue
+            info = content.find("div", {"class":self.webContentInfo})
+            if len(info) == 0:
+                self.conn.saveLogInfo("wxwb", "微博页面问题", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 1)
+                print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " wxwb " + "微博页面问题  " + "运行状态: " + str(1))
+                continue
+
+            nick_name = content.find("a", {"class":self.nickName}).text
+
+            comment = content.find("p",{"class":self.webPcommentClass}).text
+
+
+            from_content = content.find("p", {"class": self.timeUrlFrom})
+            from_time_url = from_content.findAll("a")[0]
+            href = from_time_url["href"]
+            time = from_time_url.text.strip()
+
+            if time[0] is "今":
+                time = datetime.datetime.now()
+            else:
+                time_split = time.split(" ")
+                year = str(datetime.datetime.now().year)
+                time_m_d = time_split[0]
+                time = year + "-" + str(time_m_d[0]) + str(time_m_d[1]) + \
+                       "-" + str(time_m_d[3]) + str(time_m_d[4])
+
             ## 加入筛选机制
-            if not self.analyze("http:" + href,nick,session):
+            if not self.analyze("http:" + href,nick_name,session):
                 self.conn.saveLogInfo("wxwb", "http:"+ href+ "该文章不符合要求", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 1)
-                print("wxwb " + "http:"+ href + "该微信文章不符合要求" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + str(1))
+                print("wxwb " + "http:"+ href + "该微博文章不符合要求" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + str(1))
                 continue
 
             # if not self.notKeySacape(conment):
             #     continue
-            time = concretContent["title"]
-            ulMedia = div.find("ul")
+            images = content.find("div", {"node-type": self.imgNode})
+            ulMedia = images.find("ul")
             imageListStr = ""
             if ulMedia:
-                for li in ulMedia.findAll("li"):
-                    imageListStr += re.findall("\//(.*)",li.find("img")["src"])[0]+","
+                liList = ulMedia.findAll("li")
+                for li in liList:
+                    img = li.find("img")
+                    imageListStr += img["src"] + ","
                 imageListStr = imageListStr[0:len(imageListStr)-1]
             faceSrc = re.findall("\//(.*)",faceList[length].find("img")["src"])[0]
             length += 1
             resultDict["face"] = faceSrc
-            icon = name.nextSibling
-            while isinstance(icon,NavigableString):
-                icon = icon.nextSibling
             resultDict["class"]=0
-            # for classStr in icon["class"]:
-            #     if classStr.find("aprove") >= 0:
-            #         resultDict["class"]=1
-            #         break
-            loc=div.find("a",{"class":self.webLocClass})
+
             lat, lon = "",""
-            if loc:
-                if re.match("http:\//t\.cn\/",loc["href"]):
-                    lat,lon = self.requestLatLon(loc["href"])
+
             resultDict["lat"] = lat
             resultDict["lon"] = lon
-            resultDict["nick"] = nick
+            resultDict["nick"] = nick_name
             resultDict["comment"] = comment
             resultDict["href"] ="http:"+href
             resultDict["dtime"]=time
@@ -376,11 +407,16 @@ class wxwb(thread):
         self.webDivClass=conf.get(conf.sections()[2],"divClass")
         self.webDivNoResult=conf.get(conf.sections()[2],"divNoReusltClass")
         self.webAcontentClass=conf.get(conf.sections()[2],"aContentClass")
+        self.webContentInfo=conf.get(conf.sections()[2], "conInfo")
         self.webPcommentClass=conf.get(conf.sections()[2],"pCommentClass")
-        self.webAconcretClass=conf.get(conf.sections()[2],"aConcretClass")
+        self.nickName=conf.get(conf.sections()[2], "nickName")
+        self.timeUrlFrom=conf.get(conf.sections()[2], "tUfrom")
+        self.imgNode=conf.get(conf.sections()[2], "imgNodeType")
         self.webDivFace=conf.get(conf.sections()[2],"divFace")
         self.webLocClass=conf.get(conf.sections()[2],"aLocClass")
         self.webDivOrigin = conf.get(conf.sections()[2],"divOriginClass")
+
+
 
         # 微信字段
         self.wxDivTxt = conf.get(conf.sections()[3],"divTxtBox")
@@ -429,7 +465,6 @@ class wxwb(thread):
     ## 依次判断是否存在关键词
     ## 首先判断是否存在位置关键词，继而判断是否存在污染关键词
     def analyze(self,artical_url,nickName,session):
-        text = None
         if session == None:
             request = urlRequest.Request(artical_url)
             response = urlRequest.urlopen(request)
